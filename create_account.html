@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ایجاد حساب کاربری</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* استایل‌های عمومی */
+        body {
+            font-family: 'Vazirmatn', 'Arial', sans-serif;
+            background-color: #0f1923;
+            color: #f0f0f0;
+            direction: rtl;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card-body {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            
+        }
+
+        /* استای فرم */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 10px;
+            color: #4a90e2;
+            font-size: 18px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 40px 10px 10px;
+            border: 1px solid #2c5282;
+            border-radius: 5px;
+            background-color: #0f1923;
+            color: #f0f0f0;
+            font-size: 16px;
+        }
+
+        input::placeholder {
+            color: #718096;
+        }
+
+        /* استایل دکمه‌ها */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .create-btn {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .connect-btn {
+            background-color: #2c5282;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: all 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* استایل نشانگر قدرت رمز عبور */
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            background-color: #ddd;
+            border-radius: 3px;
+        }
+
+        .password-strength-meter {
+            height: 100%;
+            width: 100%;
+            border-radius: 3px;
+            transition: background-color 0.3s ease;
+        }
+
+        .weak { 
+            background-color: #ff4d4d; 
+        }
+        
+        .strong { 
+            background-color: #00cc00; 
+        }
+
+        .empty {
+            background-color: #ddd;
+        }
+
+        /* استایل برای دکمه نمایش/مخفی کردن رمز عبور */
+        .toggle-password {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #718096;
+        }
+
+        /* استایل پیام‌ها */
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .message.success {
+            background-color: #0d4b26;
+            color: #4ade80;
+        }
+
+        .message.error {
+            background-color: #4c0519;
+            color: #f87171;
+        }
+
+        /* استایل لودینگ */
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4a90e2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* غیرفعال کردن دکمه */
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* اضافه کردن استایل‌های جدید */
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-container {
+            display: inline-block;
+            position: relative;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .brand-name {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(120deg, 
+                #4a90e2, 
+                #63b3ed, 
+                #4299e1,
+                #3182ce,
+                #4a90e2
+            );
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+            position: relative;
+            letter-spacing: 2px;
+            animation: gradientFlow 8s ease infinite;
+            text-shadow: 
+                0 0 10px rgba(74, 144, 226, 0.2),
+                0 0 20px rgba(74, 144, 226, 0.2),
+                0 0 30px rgba(74, 144, 226, 0.2);
+        }
+
+        .brand-name::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -2;
+            background: linear-gradient(120deg, #4a90e2, #63b3ed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: blur(24px);
+            opacity: 0.7;
+            animation: textGlow 3s ease-in-out infinite alternate;
+        }
+
+        .brand-name::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            right: -10%;
+            bottom: -10%;
+            background: linear-gradient(45deg, 
+                transparent 0%,
+                rgba(74, 144, 226, 0.1) 50%,
+                transparent 100%
+            );
+            z-index: -1;
+            animation: lightPass 8s linear infinite;
+        }
+
+        .brand-name .plus {
+            font-size: 0.7em;
+            vertical-align: super;
+            background: linear-gradient(120deg, 
+                #22c55e, 
+                #4ade80, 
+                #22c55e, 
+                #16a34a,
+                #22c55e
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+            animation: gradientFlow 6s ease infinite,
+                       floatPlus 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 15px rgba(74, 144, 226, 0.4));
+            animation: logoAnimation 6s ease-in-out infinite;
+            transform-origin: center center;
+        }
+
+        /* انیمیشن‌های جدید و پیشرفته */
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes textGlow {
+            0% {
+                filter: blur(24px) brightness(100%);
+                opacity: 0.7;
+            }
+            100% {
+                filter: blur(32px) brightness(200%);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes lightPass {
+            0% { transform: translateX(-200%) skewX(-45deg); }
+            100% { transform: translateX(200%) skewX(-45deg); }
+        }
+
+        @keyframes floatPlus {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: brightness(100%);
+            }
+            50% {
+                transform: translateY(-8px) rotate(5deg) scale(1.1);
+                filter: brightness(150%);
+            }
+        }
+
+        @keyframes logoAnimation {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 15px rgba(74, 144, 226, 0.4));
+            }
+            25% {
+                transform: translateY(-10px) rotate(5deg) scale(1.05);
+                filter: drop-shadow(0 0 20px rgba(74, 144, 226, 0.8));
+            }
+            50% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 15px rgba(74, 144, 226, 0.4));
+            }
+            75% {
+                transform: translateY(-10px) rotate(-5deg) scale(1.05);
+                filter: drop-shadow(0 0 20px rgba(74, 144, 226, 0.8));
+            }
+            100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                filter: drop-shadow(0 0 15px rgba(74, 144, 226, 0.4));
+            }
+        }
+
+        /* افکت پارتیکل پیشرفته */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(
+                circle,
+                rgba(74, 144, 226, 0.3) 0%,
+                transparent 70%
+            );
+            border-radius: 50%;
+            animation: particleFloat 15s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0;
+            }
+            25% {
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(100px, -100px) scale(1.5);
+                opacity: 0.8;
+            }
+            75% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(200px, -200px) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* اضافه کردن Media Queries برای ریسپانسیو */
+        @media screen and (max-width: 768px) {
+            .card-body {
+                max-width: 100%;
+                margin: 0 15px;
+                padding: 15px;
+            }
+
+            .brand-name {
+                font-size: 2.5em;
+            }
+
+            .logo {
+                width: 70px;
+                height: 70px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            input {
+                font-size: 14px;
+            }
+
+            .card-header {
+                padding: 10px;
+            }
+
+            .brand-container {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .brand-name {
+                font-size: 2em;
+            }
+
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
+
+            .card-body {
+                padding: 10px;
+            }
+
+            input {
+                padding: 8px 35px 8px 8px;
+            }
+
+            .input-icon {
+                font-size: 16px;
+            }
+
+            .toggle-password {
+                font-size: 14px;
+            }
+        }
+
+        /* اضافه کردن استایل برای container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* بهینه‌سازی card برای نمایش موبایل */
+        .card {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="particles">
+                    <!-- پارتیکل‌ها با JavaScript اضافه می‌شوند -->
+                </div>
+                <div class="brand-container">
+                    <img src="img/icons8-blockchain-94.png" alt="Logo" class="logo">
+                    <div class="brand-name" data-text="دیجی">دیجی<span class="plus">پلاس</span></div>
+                </div>
+                <div class="wave"></div>
+                <h2>ایجاد حساب کاربری</h2>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                        <input type="text" id="username" placeholder="نام کاربری">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                        <input type="email" id="email" placeholder="آدرس ایمیل">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="password" placeholder="رمز عبور (حداقل 8 کاراکتر)">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="password-strength">
+                        <div id="password-strength-meter" class="password-strength-meter"></div>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="confirm-password" placeholder="تکرار رمز عبور">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('confirm-password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-key"></i></span>
+                        <input type="password" id="email-password" placeholder="رمز عبور ایمیل">
+                        <span class="toggle-password" onclick="togglePasswordVisibility('email-password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn create-btn" onclick="createAccount()" id="create-btn">
+                            <span class="btn-text">ایجاد حساب</span>
+                            <span class="loading"></span>
+                        </button>
+                        <button type="button" class="btn connect-btn" onclick="connectAccount()">
+                            <span>ورود</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function checkPasswordStrength(password) {
+            const meter = document.getElementById('password-strength-meter');
+            
+            // پاک کردن کلاس‌های قبلی
+            meter.classList.remove('weak', 'strong', 'empty');
+            
+            if (password.length === 0) {
+                meter.classList.add('empty');
+                return;
+            }
+
+            const hasLetters = /[A-Za-z]/.test(password);
+            const hasNumbers = /[0-9]/.test(password);
+            
+            if (hasLetters && hasNumbers) {
+                meter.classList.add('strong');
+            } else {
+                meter.classList.add('weak');
+            }
+        }
+
+        async function createAccount() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const emailPassword = document.getElementById('email-password').value;
+            const createBtn = document.getElementById('create-btn');
+            const btnText = createBtn.querySelector('.btn-text');
+            const loading = createBtn.querySelector('.loading');
+
+            // بررسی خالی نبودن فیلدها
+            if (!username || !email || !password || !confirmPassword || !emailPassword) {
+                showMessage('لطفاً تمام فیلدها را پر کنید.', 'error');
+                return;
+            }
+
+            // بررسی وجود حداقل یک حرف و یک عدد در رمز عبور
+            const hasLetters = /[A-Za-z]/.test(password);
+            const hasNumbers = /[0-9]/.test(password);
+            if (!hasLetters || !hasNumbers) {
+                showMessage('رمز عبور باید شامل حروف و اعداد باشد.', 'error');
+                return;
+            }
+
+            // بررسی تطابق رمز عبور
+            if (password !== confirmPassword) {
+                showMessage('رمز عبور و تکرار آن مطابقت ندارند.', 'error');
+                return;
+            }
+
+            // نمایش لودینگ
+            createBtn.disabled = true;
+            btnText.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                // شبیه‌سازی تأخیر شبکه
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // ذخیره اطلاعات
+                localStorage.setItem('username', username);
+                localStorage.setItem('email', email);
+                localStorage.setItem('password', password);
+                localStorage.setItem('emailPassword', emailPassword);
+                
+                showMessage('حساب کاربری شما با موفقیت ایجاد شد.', 'success');
+                
+                // پاک کردن فرم
+                document.getElementById('username').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('confirm-password').value = '';
+                document.getElementById('email-password').value = '';
+                document.getElementById('password-strength-meter').className = 'password-strength-meter';
+                
+            } catch (error) {
+                showMessage('خطا در ایجاد حساب کاربری.', 'error');
+            } finally {
+                // حذف لودینگ
+                createBtn.disabled = false;
+                btnText.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+
+        function connectAccount() {
+            const storedUsername = localStorage.getItem('username');
+            const storedPassword = localStorage.getItem('password');
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!storedUsername || !storedPassword) {
+                showMessage('شما هنوز حساب کاربری ندارید. لطفاً ابتدا یک حساب ایجاد کنید.', 'error');
+                return;
+            }
+
+            // بررسی اطلاعات ��ارد شده
+            if (username === storedUsername && password === storedPassword) {
+                localStorage.setItem('isLoggedIn', 'true');
+                // تغییر مسیر به index.html
+                window.location.href = 'index.html';
+            } else {
+                showMessage('نام کاربری یا رمز عبور اشتباه است.', 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('message');
+            messageBox.innerText = message;
+            messageBox.className = `message ${type}`;
+            messageBox.classList.add('show');
+            
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                setTimeout(() => {
+                    messageBox.className = 'message';
+                    messageBox.innerText = '';
+                }, 300);
+            }, 3000);
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // اضافه کردن event listener برای بررسی همزمان رمز عبور
+        document.getElementById('password').addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+
+        // اضافه کردن پارتیکل‌ها به صورت داینامیک
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // تنظیمات تصادفی برای هر پارتیکل
+                const size = Math.random() * 100 + 50;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                particle.style.animationDuration = `${15 + Math.random() * 10}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // فراخوانی تابع هنگام بارگذاری صفحه
+        window.addEventListener('load', createParticles);
+    </script>
+</body>
+</html>

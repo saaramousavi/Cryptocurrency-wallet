@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کیف پول</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* تنظیمات کلی صفحه با تم تیره */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        /* استایل پروفایل */
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 10px;
+        }
+
+        #wallet-username {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f0f0f0;
+        }
+
+        /* کارت‌های تراکنش */
+        .transaction-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .transaction-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a3a5c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .transaction-card i {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .transaction-card:hover {
+            background-color: #0056b3;
+        }
+
+        /* استایل کارت‌های رمزارز */
+        .crypto-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+
+        .crypto-card {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            width: calc(50% - 20px);
+            max-width: 300px;
+            color: #f0f0f0;
+        }
+
+        .crypto-card h3 {
+            margin-bottom: 10px;
+            color: #ffdd57;
+        }
+
+        .crypto-card p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .crypto-card {
+                width: 100%;
+            }
+        }
+
+        /* دکمه خروج */
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* منوی پایین صفحه */
+        .bottom-menu {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #1a3a5c; /* تغییر رنگ پس‌زمینه به آبی تیره‌تر */
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            color: #e0e0e0; /* تغییر رنگ متن به خاکستری روشن برای خوانایی بهتر */
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .menu-item:hover {
+            color: #ffffff; /* تغییر رنگ هاور به سفید برای تأکید بیشتر */
+        }
+
+        /* استایل برای نمایش موجودی کل */
+        .total-balance {
+            background-color: #3a3a3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #ffdd57;
+        }
+
+        .total-balance h2 {
+            margin-bottom: 10px;
+        }
+
+        #total-balance-amount {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* استایل برای لودر */
+        .loader {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* بهبود دسترسی‌پذیری برای عناصر تعاملی */
+        .transaction-card,
+        .logout-btn,
+        .menu-item {
+            transition: all 0.3s ease;
+        }
+
+        .transaction-card:focus,
+        .logout-btn:focus,
+        .menu-item:focus {
+            outline: 2px solid #ffdd57;
+            box-shadow: 0 0 8px #ffdd57;
+        }
+
+        /* اضافه کردن استایل‌های رسپانسیو */
+        @media (max-width: 768px) {
+            /* تنظیمات کلی */
+            .container {
+                padding: 10px;
+            }
+
+            /* کارت‌های تراکنش */
+            .transaction-options {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .transaction-card {
+                width: calc(33% - 10px);
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            /* کارت‌های رمزارز */
+            .crypto-card {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            /* منوی پایین */
+            .bottom-menu {
+                padding: 8px 0;
+                font-size: 0.9em;
+            }
+
+            .menu-item {
+                font-size: 0.9em;
+                padding: 5px;
+            }
+
+            /* موجودی کل */
+            .total-balance {
+                padding: 15px;
+            }
+
+            #total-balance-amount {
+                font-size: 1.3em;
+            }
+
+            /* پروفایل */
+            .profile-picture {
+                width: 80px;
+                height: 80px;
+            }
+
+            #wallet-username {
+                font-size: 1.1em;
+            }
+        }
+
+        /* برای صفحه‌نمایش‌های خیلی کوچک */
+        @media (max-width: 480px) {
+            /* کارت‌های تراکنش */
+            .transaction-card {
+                width: calc(50% - 10px);
+            }
+
+            /* منوی پایین */
+            .bottom-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .menu-item {
+                width: calc(33% - 10px);
+                text-align: center;
+                font-size: 0.8em;
+            }
+
+            /* مودال‌ها */
+            .modal {
+                width: 90% !important;
+                padding: 15px !important;
+            }
+
+            /* نمودارها */
+            .chart-placeholder {
+                height: 150px;
+            }
+        }
+
+        /* تنظیمات برای صفحه‌نمایش‌های بزرگ */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1140px;
+                margin: 0 auto;
+            }
+
+            .crypto-card {
+                width: calc(33.333% - 20px);
+            }
+        }
+
+        /* بهینه‌سازی برای حالت landscape موبایل */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .bottom-menu {
+                position: static;
+                margin-top: 20px;
+            }
+
+            .container {
+                margin-bottom: 20px;
+            }
+        }
+
+        /* اضافه کردن فاصله از منوی پایین */
+        .container {
+            margin-bottom: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- اضافه کردن نمایش موجودی کل -->
+        <div class="total-balance">
+            <h2>موجودی کل</h2>
+            <p id="total-balance-amount">در حال بارگذاری...</p>
+        </div>
+
+        <div class="profile">
+            <!-- اضافه کردن تصویر پروفایل کاربر به صورت داینامیک -->
+            <div class="profile-picture" id="profile-pic" style="background-image: url('path_to_profile_image.png');"></div>
+            <!-- اضافه کردن نام کاربر -->
+            <p id="wallet-username"></p>
+        </div>
+        <h2>اطلاعات کیف پول</h2>
+        
+        <div class="transaction-options">
+            <div class="transaction-card">
+                <i class="fas fa-shopping-cart"></i>
+                <span>خرید</span>
+            </div>
+            <div class="transaction-card">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>فروش</span>
+            </div>
+            <div class="transaction-card">
+                <i class="fas fa-exchange-alt"></i>
+                <span>تبدیل</span>
+            </div>
+        </div>
+
+        <div class="crypto-info">
+            <div class="crypto-card">
+                <h3>بیت کوین</h3>
+                <p>موجودی: <span id="btc-balance">0.00</span></p>
+                <canvas id="btcChart" class="chart-placeholder"></canvas>
+            </div>
+            <div class="crypto-card">
+                <h3>اتریوم</h3>
+                <p>موجودی: <span id="eth-balance">0.00</span></p>
+                <canvas id="ethChart" class="chart-placeholder"></canvas>
+            </div>
+            <div class="crypto-card">
+                <h3>سولانا</h3>
+                <p>موجودی: <span id="sol-balance">0.00</span></p>
+                <canvas id="solChart" class="chart-placeholder"></canvas>
+            </div>
+            <div class="crypto-card">
+                <h3>لایت کوین</h3>
+                <p>موجودی: <span id="ltc-balance">0.00</span></p>
+                <canvas id="ltcChart" class="chart-placeholder"></canvas>
+            </div>
+            <div class="crypto-card">
+                <h3>ریپل</h3>
+                <p>موجودی: <span id="xrp-balance">0.00</span></p>
+                <canvas id="xrpChart" class="chart-placeholder"></canvas>
+            </div>
+            <div class="crypto-card">
+                <h3>کاردانو</h3>
+                <p>وجودی: <span id="ada-balance">0.00</span></p>
+                <canvas id="adaChart" class="chart-placeholder"></canvas>
+            </div>
+        </div>
+
+        <!-- اضافه کردن لودر -->
+        <div id="loader" class="loader" style="display: none;">در حال بارگذاری...</div>
+
+    
+    </div>
+
+    <div class="bottom-menu">
+        <div class="menu-item" onclick="goToHome()">خانه</div>
+        <div class="menu-item" onclick="goToWallet()">کیف پول</div>
+        <div class="menu-item" onclick="showHistory()">تاریخچه</div>
+        <div class="menu-item" onclick="goToSettings()">تنظیمات</div>
+        <div class="menu-item" onclick="shareWithFriends()">دعوت دوستان</div>
+        <div class="menu-item" onclick="logout()">خروج</div>
+    </div>
+
+    <script>
+        // بارگذاری اطلاعات کاربر و تصویر و نمودارها
+        async function loadUserData() {
+            document.getElementById('loader').style.display = 'block';
+            
+            const username = localStorage.getItem('username');
+            document.getElementById('wallet-username').innerText = username;
+            
+            // نمایش پیام خوش‌آمدگویی
+            showWelcomeMessage(username);
+
+            // شبیه‌سازی دریافت داده‌های کاربر
+            const userBalances = {
+                btc: 0.5,
+                eth: 2.3,
+                sol: 10,
+                ltc: 5,
+                xrp: 100,
+                ada: 200
+            };
+
+            // نمایش موجودی‌ها
+            Object.keys(userBalances).forEach(coin => {
+                document.getElementById(`${coin}-balance`).innerText = userBalances[coin];
+            });
+
+            // محاسبه و نمایش موجودی کل
+            const totalBalance = Object.values(userBalances).reduce((sum, balance) => sum + balance, 0);
+            document.getElementById('total-balance-amount').innerText = `$${totalBalance.toFixed(2)}`;
+
+            loadCharts();
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        // فراخوانی تابع loadUserData به جای loadCharts
+        loadUserData();
+
+        function loadCharts() {
+            const cryptos = ['btc', 'eth', 'sol', 'ltc', 'xrp', 'ada'];
+            const colors = {
+                btc: 'rgba(255, 165, 0, 1)',
+                eth: 'rgba(54, 162, 235, 1)',
+                sol: 'rgba(255, 99, 132, 1)',
+                ltc: 'rgba(75, 192, 192, 1)',
+                xrp: 'rgba(153, 102, 255, 1)',
+                ada: 'rgba(0, 255, 85, 1)'
+            };
+
+            cryptos.forEach(crypto => {
+                const ctx = document.getElementById(`${crypto}Chart`).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'],
+                        datasets: [{
+                            label: `قیمت ${crypto.toUpperCase()}`,
+                            data: [30, 35, 32, 37, 39, 36], // داده‌های نمونه
+                            backgroundColor: colors[crypto].replace('1)', '0.2)'),
+                            borderColor: colors[crypto],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // فراخوانی تابع loadCharts در زمان مناسب (مثلاً پس از بارگذاری صفحه)
+        document.addEventListener('DOMContentLoaded', loadCharts);
+
+        function logout() {
+            // از حساب خارج شوید و به صفحه اصلی برگردید
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+            localStorage.removeItem('profileImagePath'); // حذف تصویر پروفایل
+            window.location.href = 'create_account.html';
+        }
+
+        function shareWithFriends() {
+            const inviteText = `
+                سلام دوست من!
+                من از کیف پول رمزارز X استفاده می‌کنم و پیشنهاد می‌کنم شما هم عضو شوید.
+                برای عضویت از لینک زیر استفاده کنید:
+                ${window.location.origin}/create_account.html?ref=${localStorage.getItem('username')}
+            `;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'دعوت به کیف پول رمزارز',
+                    text: inviteText,
+                    url: `${window.location.origin}/create_account.html?ref=${localStorage.getItem('username')}`
+                })
+                .then(() => console.log('دعوت‌نامه با موفقیت ارسال شد'))
+                .catch((error) => console.log('خطا در ارسال دعوت‌نامه:', error));
+            } else {
+                // اگر Web Share API پشتیبانی نشود، متن را در کلیپ‌بورد کپی می‌کنیم
+                navigator.clipboard.writeText(inviteText)
+                    .then(() => alert('لینک دعوت در کلیپ‌بورد کپی شد. می‌توانید آن را برای دوستان خود ارسال کنید.'))
+                    .catch(() => alert('خطا در کپی کردن لینک. لطفاً دوباره تلاش کنید.'));
+            }
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        function goToWallet() {
+            window.location.href = 'profile.html';
+        }
+
+        function showHistory() {
+            // نمایش مودال تاریخچه تراکنش‌ها
+            const transactions = [
+                { date: '۱۴۰۲/۱۲/۱۵', type: 'خرید', amount: '۰.۱ BTC', status: 'موفق' },
+                { date: '۱۴۰۲/۱۲/۱۴', type: 'فروش', amount: '۲.۵ ETH', status: 'موفق' },
+                // ... می‌توانید تراکنش‌های بیشتری اضافه کنید
+            ];
+
+            let historyHTML = `
+                <div class="modal" id="historyModal" style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #2a2a2a;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 1000;
+                    width: 80%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                ">
+                    <h2>تاریخچه تراکنش‌ها</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <tr>
+                            <th style="padding: 10px; border-bottom: 1px solid #444;">تاریخ</th>
+                            <th style="padding: 10px; border-bottom: 1px solid #444;">نوع</th>
+                            <th style="padding: 10px; border-bottom: 1px solid #444;">مقدار</th>
+                            <th style="padding: 10px; border-bottom: 1px solid #444;">وضعیت</th>
+                        </tr>
+            `;
+
+            transactions.forEach(tx => {
+                historyHTML += `
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #444;">${tx.date}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #444;">${tx.type}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #444;">${tx.amount}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #444;">${tx.status}</td>
+                    </tr>
+                `;
+            });
+
+            historyHTML += `
+                    </table>
+                    <button onclick="closeHistoryModal()" style="
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        background: #1a3a5c;
+                        border: none;
+                        border-radius: 5px;
+                        color: white;
+                        cursor: pointer;
+                    ">بستن</button>
+                </div>
+                <div id="modalOverlay" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                " onclick="closeHistoryModal()"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', historyHTML);
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').remove();
+            document.getElementById('modalOverlay').remove();
+        }
+
+        function goToSettings() {
+            // نمایش مودال تنظیمات
+            const settingsHTML = `
+                <div class="modal" id="settingsModal" style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #2a2a2a;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 1000;
+                    width: 80%;
+                    max-width: 500px;
+                ">
+                    <h2>تنظیمات</h2>
+                    <div style="margin: 20px 0;">
+                        <h3>تنظیمات امنیتی</h3>
+                        <div style="margin: 10px 0;">
+                            <label>تایید دو رحله‌ای:</label>
+                            <input type="checkbox" id="2fa-toggle">
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <button onclick="changePassword()" style="
+                                padding: 10px;
+                                background: #1a3a5c;
+                                border: none;
+                                border-radius: 5px;
+                                color: white;
+                                cursor: pointer;
+                                margin: 5px;
+                            ">تغییر رمز عبور</button>
+                        </div>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <h3>تنظیمات اعلان‌ها</h3>
+                        <div style="margin: 10px 0;">
+                            <label>اعلان‌های قیمت:</label>
+                            <input type="checkbox" id="price-notifications">
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <label>اعلان‌های امنیتی:</label>
+                            <input type="checkbox" id="security-notifications">
+                        </div>
+                    </div>
+                    <button onclick="closeSettingsModal()" style="
+                        padding: 10px 20px;
+                        background: #1a3a5c;
+                        border: none;
+                        border-radius: 5px;
+                        color: white;
+                        cursor: pointer;
+                    ">بستن</button>
+                </div>
+                <div id="settingsOverlay" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                " onclick="closeSettingsModal()"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', settingsHTML);
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').remove();
+            document.getElementById('settingsOverlay').remove();
+        }
+
+        function changePassword() {
+            alert('این قابلیت به زودی اضافه خواهد شد');
+        }
+
+        function showErrorModal(message) {
+            const errorHTML = `
+                <div class="modal" id="errorModal" style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #2a2a2a;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 1000;
+                    width: 80%;
+                    max-width: 400px;
+                    text-align: center;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                ">
+                    <div style="color: #ff6b6b; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 48px;"></i>
+                    </div>
+                    <h3 style="margin: 10px 0; color: #ff6b6b;">خطا در بارگذاری</h3>
+                    <p style="margin: 15px 0; line-height: 1.5;">${message}</p>
+                    <button onclick="closeErrorModal()" style="
+                        padding: 10px 20px;
+                        background: #1a3a5c;
+                        border: none;
+                        border-radius: 5px;
+                        color: white;
+                        cursor: pointer;
+                        transition: background 0.3s ease;
+                    ">متوجه شدم</button>
+                </div>
+                <div id="errorOverlay" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                " onclick="closeErrorModal()"></div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', errorHTML);
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').remove();
+            document.getElementById('errorOverlay').remove();
+        }
+
+        function showWelcomeMessage(username) {
+            const welcomeHTML = `
+                <div class="modal" id="welcomeModal" style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #1a3a5c;
+                    padding: 25px;
+                    border-radius: 15px;
+                    z-index: 1000;
+                    width: 80%;
+                    max-width: 400px;
+                    text-align: center;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                ">
+                    <div style="color: #ffdd57; margin-bottom: 15px;">
+                        <i class="fas fa-star" style="font-size: 48px;"></i>
+                    </div>
+                    <h3 style="margin: 10px 0; color: #ffffff; font-size: 1.4em;">خوش آمدید ${username} عزیز!</h3>
+                    <p style="margin: 15px 0; line-height: 1.6; color: #e0e0e0;">
+                        به دیجی پلاس خوش آمدید. امیدواریم تجربه خوبی در مدیریت دارایی‌های دیجیتال خود داشته باشید.
+                    </p>
+                    <button onclick="closeWelcomeModal()" style="
+                        padding: 12px 25px;
+                        background: #ffdd57;
+                        border: none;
+                        border-radius: 8px;
+                        color: #1a3a5c;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: all 0.3s ease;
+                    ">شروع کنید</button>
+                </div>
+                <div id="welcomeOverlay" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.6);
+                    z-index: 999;
+                    backdrop-filter: blur(3px);
+                " onclick="closeWelcomeModal()"></div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', welcomeHTML);
+
+            // بستن خودکار پیام خوش‌آمدگویی بعد از 5 ثانیه
+            setTimeout(closeWelcomeModal, 5000);
+        }
+
+        function closeWelcomeModal() {
+            const modal = document.getElementById('welcomeModal');
+            const overlay = document.getElementById('welcomeOverlay');
+            if (modal) modal.remove();
+            if (overlay) overlay.remove();
+        }
+    </script>
+</body>
+</html>
